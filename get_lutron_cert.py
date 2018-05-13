@@ -117,7 +117,8 @@ except FileNotFoundError:
         json=pairing_request_content,
         headers={
             "X-DeviceType": "Caseta,RA2Select",
-            "Authorization": "Bearer %s" % access_token
+            "Authorization": "Bearer %s" % access_token,
+            "Content-Type": "application/x-www-form-urlencoded"
         }
     ).json()
 
