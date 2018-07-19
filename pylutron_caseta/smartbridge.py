@@ -14,6 +14,8 @@ _LOG.setLevel(logging.DEBUG)
 LEAP_PORT = 8081
 PING_INTERVAL = 60.0
 PING_DELAY = 5.0
+CONNECT_TIMEOUT = 5.0
+RECONNECT_DELAY = 2.0
 
 
 class Smartbridge:
@@ -237,12 +239,16 @@ class Smartbridge:
         try:
             while True:
                 try:
-                    yield from self._login()
+                    yield from asyncio.wait_for(self._login(),
+                                                timeout=CONNECT_TIMEOUT,
+                                                loop=self._loop)
                     received = yield from self._reader.read()
                     if received is not None:
                         self._handle_response(received)
-                except (ValueError, ConnectionError):
+                except (ValueError, ConnectionError, asyncio.TimeoutError):
                     _LOG.warning("reconnecting", exc_info=1)
+                    yield from asyncio.sleep(RECONNECT_DELAY,
+                                             loop=self._loop)
         except asyncio.CancelledError:
             pass
         except Exception:
@@ -285,7 +291,8 @@ class Smartbridge:
         """Connect and login to the Smart Bridge LEAP server using SSL."""
         with (yield from self._login_lock):
             if self._reader is not None and self._writer is not None:
-                if (self._reader.exception() is None and
+                if (self.logged_in and
+                        self._reader.exception() is None and
                         not self._reader.at_eof()):
                     return
                 self._writer.abort()
