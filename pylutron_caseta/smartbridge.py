@@ -245,8 +245,13 @@ class Smartbridge:
                     received = yield from self._reader.read()
                     if received is not None:
                         self._handle_response(received)
-                except (ValueError, ConnectionError, asyncio.TimeoutError):
+                except (ValueError, ConnectionError, asyncio.TimeoutError,
+                        OSError):
+                    # ValueError is from invalid JSON.
+                    # Python sometimes spells ConnectionError "OSError".
                     _LOG.warning("reconnecting", exc_info=1)
+                    if self._writer is not None:
+                        self._writer.abort()
                     yield from asyncio.sleep(RECONNECT_DELAY,
                                              loop=self._loop)
         except asyncio.CancelledError:
