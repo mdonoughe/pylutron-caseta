@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Connections in dual-stack or IPv6-only networks should succeed. IPv6 support requires that the bridge accepts IPv6 connections, which is not the case for Caséta.
+
 ## [0.18.1] - 2023-02-03
 
 ### Fixed

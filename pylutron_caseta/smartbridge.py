@@ -119,7 +119,7 @@ class Smartbridge:
                 port,
                 server_hostname="",
                 ssl=ssl_context,
-                family=socket.AF_INET,
+                happy_eyeballs_delay=0.25,
             )
             return res
 
